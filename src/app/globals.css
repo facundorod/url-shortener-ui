@@ -1025,6 +1025,10 @@ a:hover {
   }
 }
 
+.signup-margin {
+  margin-top: 2rem;
+}
+
 /* ===== PRINT STYLES ===== */
 @media print {
   * {

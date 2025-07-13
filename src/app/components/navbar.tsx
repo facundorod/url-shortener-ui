@@ -53,7 +53,7 @@ export default function Navbar() {
             alignItems: 'center',
             justifyContent: 'flex-end'
           }}>
-            <Link href="/login" className="btn btn-primary btn-sm">
+            <Link href="/auth/login" className="btn btn-primary btn-sm">
               Sign In
             </Link>
           </div>

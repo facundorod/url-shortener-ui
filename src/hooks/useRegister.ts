@@ -1,29 +1,34 @@
 import { useState } from "react";
-import { login } from "@/lib/services/auth.service";
+import { register } from "@/lib/services/auth.service";
 import { User } from "@/lib/models/user.model";
 
-export interface LoginResult {
+export interface RegisterResult {
   user: Partial<User>;
   token?: string;
 }
 
-interface UseLoginReturn {
-  loginUser: (email: string, password: string) => Promise<LoginResult | null>;
+interface UseRegisterReturn {
+  registerUser: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<RegisterResult | null>;
   isLoading: boolean;
   error: string | null;
-  result: LoginResult | null;
+  result: RegisterResult | null;
   reset: () => void;
 }
 
-export const useLogin = (): UseLoginReturn => {
+export const useRegister = (): UseRegisterReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<LoginResult | null>(null);
+  const [result, setResult] = useState<RegisterResult | null>(null);
 
-  const loginUser = async (
+  const registerUser = async (
+    name: string,
     email: string,
     password: string
-  ): Promise<LoginResult | null> => {
+  ): Promise<RegisterResult | null> => {
     // Reset previous state
     setIsLoading(true);
     setError(null);
@@ -31,6 +36,14 @@ export const useLogin = (): UseLoginReturn => {
 
     try {
       // Validate inputs
+      if (!name.trim()) {
+        throw new Error("Name is required");
+      }
+
+      if (name.trim().length < 2) {
+        throw new Error("Name must be at least 2 characters");
+      }
+
       if (!email.trim()) {
         throw new Error("Email is required");
       }
@@ -47,37 +60,39 @@ export const useLogin = (): UseLoginReturn => {
         throw new Error("Password must be at least 8 characters");
       }
 
-      const response = await login(email.trim(), password);
+      const response = await register({
+        name: name.trim(),
+        email: email.trim(),
+        password: password,
+      });
 
       if (!response) {
-        throw new Error("Login failed. Please try again.");
+        throw new Error("Registration failed. Please try again.");
       }
 
-      const loginResult: LoginResult = {
+      const registerResult: RegisterResult = {
         user: response,
         token: response.token,
       };
 
-      setResult(loginResult);
-      return loginResult;
+      setResult(registerResult);
+      return registerResult;
     } catch (error) {
-      let errorMessage =
-        "Login failed. Please check your credentials and try again.";
+      let errorMessage = "Registration failed. Please try again.";
 
       if (error instanceof Error) {
         // Handle specific error cases
-        if (
-          error.message.includes("401") ||
-          error.message.toLowerCase().includes("unauthorized")
-        ) {
-          errorMessage = "Invalid email or password. Please try again.";
-        } else if (error.message.includes("400")) {
-          errorMessage = "Invalid login data. Please check your information.";
-        } else if (error.message.includes("403")) {
-          errorMessage = "Account access denied. Please contact support.";
-        } else if (error.message.includes("404")) {
+        if (error.message.includes("400")) {
           errorMessage =
-            "Account not found. Please check your email or sign up.";
+            "Invalid registration data. Please check your information.";
+        } else if (
+          error.message.includes("409") ||
+          error.message.toLowerCase().includes("already exists")
+        ) {
+          errorMessage =
+            "An account with this email already exists. Please use a different email.";
+        } else if (error.message.includes("422")) {
+          errorMessage = "Please check your input data and try again.";
         } else if (error.message.includes("500")) {
           errorMessage = "Server error. Please try again later.";
         } else if (
@@ -106,7 +121,7 @@ export const useLogin = (): UseLoginReturn => {
   };
 
   return {
-    loginUser,
+    registerUser,
     isLoading,
     error,
     result,

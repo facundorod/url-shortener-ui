@@ -1,45 +1,31 @@
 import { useState, useEffect } from "react";
 import { getUrls } from "@/lib/services/urls.service";
-
-export interface UrlData {
-  id: number;
-  shortUrl: string;
-  originalUrl: string;
-  createdBy: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  expiresAt?: string;
-  clicks: number;
-}
+import { Url } from "@/lib/models/url.model";
 
 export interface UseUrlsReturn {
-  urls: UrlData[];
+  urls: Url[];
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 }
 
-export const useUrls = (): UseUrlsReturn => {
-  const [urls, setUrls] = useState<UrlData[]>([]);
+export const useUrls = (enabled: boolean = true): UseUrlsReturn => {
+  const [urls, setUrls] = useState<Url[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUrls = async () => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
       const response = await getUrls();
-
-      if (!response.ok && response.error) {
-        throw new Error(response.error);
-      }
-
-      setUrls(response.data || response || []);
+      setUrls(response || []);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch URLs";
@@ -56,7 +42,7 @@ export const useUrls = (): UseUrlsReturn => {
 
   useEffect(() => {
     fetchUrls();
-  }, []);
+  }, [enabled]);
 
   return {
     urls,

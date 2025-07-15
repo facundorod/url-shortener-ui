@@ -22,17 +22,12 @@ export default function LoginPage() {
       const loginResult = await loginUser(email, password);
       
       if (loginResult) {
-        if (loginResult.token) {
-          localStorage.setItem('authToken', loginResult.token);
-        }
         showToast('Login successful! Welcome back.', 'success');
         router.push('/urls');
       } else {
-        // Error is already handled by the hook and displayed inline
         showToast('Login failed. Please check the errors above and try again.', 'error');
       }
     } catch (error) {
-      // Additional error handling for unexpected errors
       console.error('Login error:', error);
       showToast('An unexpected error occurred. Please try again.', 'error');
     }

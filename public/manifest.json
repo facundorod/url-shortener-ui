@@ -1,0 +1,16 @@
+{
+  "name": "URL Shortener",
+  "short_name": "ShortLink",
+  "description": "A simple URL shortening service",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E293B",
+  "theme_color": "#334155",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

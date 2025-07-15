@@ -41,16 +41,12 @@ export const useCreateUrl = (): UseCreateUrlReturn => {
 
       const response = await createUrl(url);
 
-      if (!response.ok && response.error) {
-        throw new Error(response.error);
-      }
-
       const newUrl: CreateUrlResult = {
-        id: response.id,
-        shortUrl: response.shortUrl,
-        originalUrl: response.originalUrl,
-        createdAt: response.createdAt,
-        expiresAt: response.expiresAt,
+        id: response.id!,
+        shortUrl: response.shortUrl!,
+        originalUrl: response.originalUrl!,
+        createdAt: response.createdAt!.toString(),
+        expiresAt: response.expiresAt?.toString(),
       };
 
       setResult(newUrl);

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "./components/navbar";
 import { ToastProvider } from "../components/toast-container";
+import { AuthProvider } from "../contexts/AuthContext";
+import { AuthSync } from "../components/AuthSync";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -84,7 +86,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#334155" />
         <meta name="color-scheme" content="light dark" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
@@ -95,23 +97,27 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="URL Shortener" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#334155" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+        style={{ backgroundColor: '#1E293B' }}
       >
-        <ToastProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            
-            <main className="flex-1">
-              {children}
-            </main>
-            
-            
-          </div>
-        </ToastProvider>
+        <AuthProvider>
+          <AuthSync />
+          <ToastProvider>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              
+              <main className="flex-1">
+                {children}
+              </main>
+              
+              
+            </div>
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

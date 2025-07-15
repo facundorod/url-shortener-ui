@@ -1,30 +1,46 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCreateUrl } from '@/hooks/useCreateUrl';
 import { useUrls } from '@/hooks/useUrls';
 import { useToast } from '@/components/toast-container';
 import { deleteUrl } from '@/lib/services/urls.service';
-
-interface UrlData {
-  id: number;
-  shortUrl: string;
-  originalUrl: string;
-  createdBy?: { id: number; name: string; email: string };
-  createdAt: string | Date;
-  updatedAt: string | Date;
-  expiresAt?: string | Date;
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { Url } from '@/lib/models/url.model';
 
 export default function UrlsPage() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [newUrl, setNewUrl] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const { createNewUrl, isLoading, error, result, reset } = useCreateUrl();
-  const { urls, isLoading: urlsLoading, error: urlsError, refetch } = useUrls();
+  const { urls, isLoading: urlsLoading, error: urlsError, refetch } = useUrls(isAuthenticated && !authLoading);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="container-primary section-spacing">
+        <div className="text-center">
+          <div className="spinner"></div>
+          <p className="text-muted mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleCopyUrl = async (shortUrl: string, id: number) => {
     try {
@@ -322,7 +338,7 @@ export default function UrlsPage() {
             </div>
           ) : (
             <div className="urls-list">
-              {urls?.map((url: UrlData, index: number) => (
+              {urls?.map((url: Url, index: number) => (
               <div key={url.id} className="list-item" style={{ 
                 borderBottom: index === urls.length - 1 ? 'none' : `1px solid var(--border)`
               }}>
@@ -399,12 +415,6 @@ export default function UrlsPage() {
                     gap: 'var(--spacing-2)'
                   }}>
                   
-                    <Link href={`/urls/${url.id}/edit`} className="btn btn-secondary btn-sm">
-                      <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Edit
-                    </Link>
                     <button 
                       className="btn btn-secondary btn-sm" 
                       style={{ color: 'var(--destructive)' }}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login } from "@/lib/services/auth.service";
 import { User } from "@/lib/models/user.model";
+import { useAuth } from "../contexts/AuthContext";
 
 export interface LoginResult {
   user: Partial<User>;
@@ -16,6 +17,7 @@ interface UseLoginReturn {
 }
 
 export const useLogin = (): UseLoginReturn => {
+  const { login: authLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<LoginResult | null>(null);
@@ -57,6 +59,16 @@ export const useLogin = (): UseLoginReturn => {
         user: response,
         token: response.token,
       };
+
+      if (response.token) {
+        authLogin(response.token, {
+          id: response.id?.toString() || "unknown",
+          email: response.email || email,
+          name: response.name || "User",
+        });
+      } else {
+        console.log("No token in response");
+      }
 
       setResult(loginResult);
       return loginResult;
